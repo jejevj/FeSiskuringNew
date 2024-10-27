@@ -10,6 +10,7 @@ import LoginPage from './pages/Login';
 import TesPage from './pages/Tes2';
 import MainLayout from './components/MainLayout';
 import SweetAlert from './components/alerts/swal';
+import NotFound from './pages/NotFound'; // Import the NotFound component
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
@@ -75,19 +76,21 @@ function App() {
         <Routes>
           <Route path="/" element={
             <ProtectedRoute>
-              <MainLayout onLogout={handleLogout}> {/* Pass handleLogout here */}
+              <MainLayout onLogout={handleLogout}>
                 <Homepage />
               </MainLayout>
             </ProtectedRoute>
           } />
           <Route path="/tes" element={
             <ProtectedRoute>
-              <MainLayout onLogout={handleLogout}> {/* Pass handleLogout here */}
+              <MainLayout onLogout={handleLogout}>
                 <TesPage />
               </MainLayout>
             </ProtectedRoute>
           } />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} /> {/* This will catch all unmatched routes */}
         </Routes>
       </div>
     </BrowserRouter>

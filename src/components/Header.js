@@ -1,16 +1,41 @@
 import React from 'react';
 import moment from 'moment';
+import { useLocation, Link } from 'react-router-dom';
+import bcrypt from 'bcryptjs';
 const Header = ({ onLogout }) => {
+    const location = useLocation();
     // Retrieve user profile from local storage
     const userProfile = JSON.parse(localStorage.getItem('userProfile'));
     const role = userProfile ? userProfile.role : null; // Get the user's role
+    const id_user = userProfile ? String(userProfile.id) : null; // Convert the user's ID to a string
+
     const nama = userProfile ? userProfile.first_name : null; // Get the user's role
     const last_login = userProfile ? userProfile.last_login : null; // Get the user's role
-    var img = userProfile ? userProfile.profile_picture : null; // Get the user's role
+    var img = userProfile ? userProfile.profile_picture : null; // Get the user's rolev
+    // Access the secret key from environment variables
+
+
     if (img == null) {
         img = "https://www.shutterstock.com/image-vector/vector-illustration-color-avatar-user-260nw-2463110213.jpg";
     }
     const dateTimeAgo = moment(new Date(last_login)).fromNow();
+
+
+    const hashId = (password) => {
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+        return hash;
+    };
+
+    const id_hashed = hashId(id_user);
+
+    const sidebarItemsMhs = [
+        { path: '/', label: 'Dashboard', icon: 'fas fa-home' },
+        { path: '/kelas', label: 'Kelas', icon: 'fas fa-chalkboard-teacher' },
+        { path: '/absensi', label: 'Absensi', icon: 'fas fa-calendar-check' },
+        { path: '/pesan', label: 'Pesan', icon: 'fas fa-comment-dots' },
+        { path: '/forum-diskusi/' + id_hashed, label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
+    ];
     return (
 
         <>
@@ -277,13 +302,28 @@ const Header = ({ onLogout }) => {
                             </li>
                         )}
                         {role === 'mahasiswa' && (
-                            <li className="dropdown">
-                                <a href="#" className="nav-link has-dropdown"><i className="fas fa-book" /><span>Student Dashboard</span></a>
-                                <ul className="dropdown-menu">
-                                    <li><a className="nav-link" href="student-classes.html">My Classes</a></li>
-                                    <li><a className="nav-link" href="student-grades.html">Grades</a></li>
-                                </ul>
-                            </li>
+                            <>
+                                {sidebarItemsMhs.map((item) => (
+                                    <li key={item.path} className={location.pathname === item.path ? 'active' : ''}>
+                                        <Link to={item.path} className="nav-link">
+                                            <i className={item.icon} /> <span>{item.label}</span>
+                                        </Link>
+                                    </li>
+                                ))}
+                                <li className="dropdown">
+                                    <a href="#" className="nav-link has-dropdown"><i className="fas fa-book" /><span>Student Dashboard</span></a>
+                                    <ul className="dropdown-menu">
+                                        <li><a className="nav-link" href="student-classes.html">My Classes</a></li>
+                                        <li><a className="nav-link" href="student-grades.html">Grades</a></li>
+                                    </ul>
+                                </li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                                <li><a className="nav-link" href="blank.html"><i className="far fa-square" /> <span>Blank Page</span></a></li>
+                            </>
                         )}
                         <li className="dropdown active">
                             <a href="#" className="nav-link has-dropdown"><i className="fas fa-fire" /><span>Dashboard</span></a>
