@@ -15,6 +15,8 @@ import Profil from './pages/auth/Profil';
 import ManajemenFakultas from './pages/admin/fakultas/ManajemenFakultas';
 import ManajemenProdi from './pages/admin/prodi/Prodi';
 import ManajemenProdiDetail from './pages/admin/prodi/ManajemeProdi';
+import ManajemenAkun from './pages/admin/account/ManajemenAkun';
+import ManajemenAkunDetail from './pages/admin/account/ManajemenAkunDetail';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
@@ -100,8 +102,10 @@ function App() {
             </ProtectedRoute>
           } />
 
-          {/* SUPER ADMIN ROUTE */}
 
+
+
+          {/* SUPER ADMIN ROUTE */}
           <Route path="/manajemen-fakultas" element={
             <ProtectedRoute>
               <MainLayout onLogout={handleLogout}>
@@ -117,7 +121,6 @@ function App() {
             </ProtectedRoute>
           }
           />
-
           {/* Dynamic route for detailed faculty info */}
           <Route path="/manajemen-prodi/:facultyId" element={
             <ProtectedRoute>
@@ -127,6 +130,24 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/manajemen-akun" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ManajemenAkun />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+          />
+
+          <Route path="/manajemen-akun/:role" element={
+
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ManajemenAkunDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+          />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} /> {/* This will catch all unmatched routes */}
