@@ -13,6 +13,8 @@ import SweetAlert from './components/alerts/swal';
 import NotFound from './pages/NotFound'; // Import the NotFound component
 import Profil from './pages/auth/Profil';
 import ManajemenFakultas from './pages/admin/fakultas/ManajemenFakultas';
+import ManajemenProdi from './pages/admin/prodi/Prodi';
+import ManajemenProdiDetail from './pages/admin/prodi/ManajemeProdi';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
@@ -107,6 +109,24 @@ function App() {
               </MainLayout>
             </ProtectedRoute>
           } />
+          <Route path="/manajemen-prodi" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ManajemenProdi />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+          />
+
+          {/* Dynamic route for detailed faculty info */}
+          <Route path="/manajemen-prodi/:facultyId" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ManajemenProdiDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} /> {/* This will catch all unmatched routes */}
