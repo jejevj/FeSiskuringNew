@@ -22,6 +22,9 @@ const useTokenValidation = (apiBaseUrl = 'http://127.0.0.1:8000', loginPath = '/
                         localStorage.setItem('msg', "101"); //Profil Di Load
                         localStorage.setItem('userProfile', JSON.stringify(profileData));
                     } else if (response.status === 401) {
+
+                        //it should be logout if 401, but alert first that session has been ended
+                        // refresh is outside
                         // Token expired, try to refresh it
                         if (refresh) {
                             try {

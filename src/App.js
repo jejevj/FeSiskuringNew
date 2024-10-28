@@ -11,6 +11,8 @@ import TesPage from './pages/Tes2';
 import MainLayout from './components/MainLayout';
 import SweetAlert from './components/alerts/swal';
 import NotFound from './pages/NotFound'; // Import the NotFound component
+import Profil from './pages/auth/Profil';
+import ManajemenFakultas from './pages/admin/fakultas/ManajemenFakultas';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
@@ -85,6 +87,23 @@ function App() {
             <ProtectedRoute>
               <MainLayout onLogout={handleLogout}>
                 <TesPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/profil" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <Profil />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* SUPER ADMIN ROUTE */}
+
+          <Route path="/manajemen-fakultas" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ManajemenFakultas />
               </MainLayout>
             </ProtectedRoute>
           } />
