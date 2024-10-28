@@ -221,7 +221,7 @@ function ManajemenAkunDetail() {
                             setEditUser(null);
                         }}
                     >
-                        Add Account
+                        Tambah Akun
                     </button>
                     <input
                         type="file"
