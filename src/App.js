@@ -18,6 +18,8 @@ import ManajemenProdiDetail from './pages/admin/prodi/ManajemeProdi';
 import ManajemenAkun from './pages/admin/account/ManajemenAkun';
 import ManajemenAkunDetail from './pages/admin/account/ManajemenAkunDetail';
 import ManajemenKelas from './pages/admin/class/ManajemenKelas';
+import ListKelasDosen from './pages/dosen/kelas/ListKelas';
+import KelasDosenDetail from './pages/dosen/kelas/KelasDosenDetail';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
@@ -169,6 +171,26 @@ function App() {
             </ProtectedRoute>
           }
           /> */}
+
+
+          {/* ROUTE FOR DOSEN */}
+
+          <Route path="/dosen/kelas" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <ListKelasDosen />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/dosen/kelas/:id_kelas" element={
+            <ProtectedRoute>
+              <MainLayout onLogout={handleLogout}>
+                <KelasDosenDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+          />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} /> {/* This will catch all unmatched routes */}

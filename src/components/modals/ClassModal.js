@@ -15,8 +15,8 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
         study_program: null,
         responsible_lecturer: null,
     });
-    const [facultyList, setFacultyList] = useState([]); // List of faculties
-    const [studyProgramList, setStudyProgramList] = useState([]); // List of study programs
+    const [studyProgramList, setStudyProgramList] = useState([]);
+    const [lecturerList, setLecturerList] = useState([]);
 
     const token = localStorage.getItem('access_token');
 
@@ -53,19 +53,10 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
         }
     }, [initialData]);
 
-    // Fetch faculty and study program data when the modal is open
+    // Fetch study program and lecturer data when the modal is open
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const facultyResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/faculty/faculties/`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const facultyData = await facultyResponse.json();
-                setFacultyList(facultyData);
-
                 const programResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/prodi/study-programs/`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -74,6 +65,15 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
                 });
                 const programData = await programResponse.json();
                 setStudyProgramList(programData);
+
+                const lecturerResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/dosen/`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const lecturerData = await lecturerResponse.json();
+                setLecturerList(lecturerData);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -104,14 +104,14 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
     if (!isOpen) return null;
 
     // Prepare options for Select components
-    const facultyOptions = facultyList.map((faculty) => ({
-        value: faculty.id,
-        label: faculty.name
-    }));
-
     const studyProgramOptions = studyProgramList.map((program) => ({
         value: program.id,
         label: program.name
+    }));
+
+    const lecturerOptions = lecturerList.map((lecturer) => ({
+        value: lecturer.id,
+        label: `${lecturer.first_name} ${lecturer.last_name}`
     }));
 
     return (
@@ -164,6 +164,7 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
                             className="form-control mb-2"
                         />
 
+                        {/* Dropdown for selecting Study Program */}
                         <Select
                             options={studyProgramOptions}
                             onChange={(option) => handleSelectChange("study_program", option)}
@@ -172,12 +173,13 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
                             value={studyProgramOptions.find(option => option.value === formData.study_program) || null}
                         />
 
+                        {/* Dropdown for selecting Responsible Lecturer */}
                         <Select
-                            options={facultyOptions}
+                            options={lecturerOptions}
                             onChange={(option) => handleSelectChange("responsible_lecturer", option)}
                             placeholder="Select Responsible Lecturer"
                             className="mb-2"
-                            value={facultyOptions.find(option => option.value === formData.responsible_lecturer) || null}
+                            value={lecturerOptions.find(option => option.value === formData.responsible_lecturer) || null}
                         />
 
                         <textarea

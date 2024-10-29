@@ -40,9 +40,9 @@ const Header = ({ onLogout }) => {
 
     const sidebarItemsDsn = [
         { path: '/', label: 'Dashboard', icon: 'fas fa-home' },
-        { path: '/kelas', label: 'Kelas', icon: 'fas fa-chalkboard-teacher' },
-        { path: '/absensi', label: 'Absensi', icon: 'fas fa-calendar-check' },
-        { path: '/pesan', label: 'Pesan', icon: 'fas fa-comment-dots' },
+        { path: '/dosen/kelas', label: 'Kelas', icon: 'fas fa-chalkboard-teacher' },
+        { path: '/dosen/absensi', label: 'Absensi', icon: 'fas fa-calendar-check' },
+        { path: '/dosen/pesan', label: 'Pesan', icon: 'fas fa-comment-dots' },
         { path: '/forum-diskusi/' + id_hashed, label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
     ];
 
