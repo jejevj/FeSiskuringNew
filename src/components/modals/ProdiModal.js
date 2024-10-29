@@ -16,6 +16,7 @@ function ProdiModal({ isOpen, onClose, onSave, initialData }) {
     const [dosenList, setDosenList] = useState([]); // List of head of programs (dosen)
 
     const token = localStorage.getItem('access_token');
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
     // Load initial data if provided
     useEffect(() => {
@@ -48,7 +49,7 @@ function ProdiModal({ isOpen, onClose, onSave, initialData }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const facultyResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/faculty/faculties/`, {
+                const facultyResponse = await fetch(baseUrl + `/api/faculty/faculties/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -57,7 +58,7 @@ function ProdiModal({ isOpen, onClose, onSave, initialData }) {
                 const facultyData = await facultyResponse.json();
                 setFacultyList(facultyData);
 
-                const dosenResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/dosen/`, {
+                const dosenResponse = await fetch(baseUrl + `/api/auth/dosen/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`

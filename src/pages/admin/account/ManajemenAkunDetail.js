@@ -18,13 +18,14 @@ function ManajemenAkunDetail() {
     const [sortConfig, setSortConfig] = useState({ key: "username", direction: "ascending" });
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
+
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
     // Fetch users based on role
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/api/auth/users/?role=${role}`, {
+            const response = await fetch(`${apiUrl}/api/auth/users/?role=${role}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,7 +65,7 @@ function ManajemenAkunDetail() {
     const handleSaveUser = async (userData) => {
         try {
             const method = editUser ? 'PUT' : 'POST';
-            const url = editUser ? `${baseUrl}/api/auth/users/${editUser.id}/` : `${baseUrl}/api/auth/register/`;
+            const url = editUser ? `${apiUrl}/api/auth/users/${editUser.id}/` : `${apiUrl}/api/auth/register/`;
 
             // Set a generated password for new users
             if (!editUser) {
@@ -105,7 +106,7 @@ function ManajemenAkunDetail() {
                 password: password,
             };
 
-            await fetch(`${baseUrl}/api/email/send-email/`, {
+            await fetch(`${apiUrl}/api/email/send-email/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ function ManajemenAkunDetail() {
         formData.append("access", token);
 
         try {
-            const response = await fetch(`${baseUrl}/api/auth/upload-excel/`, {
+            const response = await fetch(`${apiUrl}/api/auth/upload-excel/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -164,7 +165,7 @@ function ManajemenAkunDetail() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${baseUrl}/api/auth/users/${userId}/`, {
+                const response = await fetch(`${apiUrl}/api/auth/users/${userId}/`, {
                     method: "DELETE",
                     headers: {
                         Authorization: `Bearer ${token}`,

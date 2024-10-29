@@ -19,6 +19,7 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
     const [lecturerList, setLecturerList] = useState([]);
 
     const token = localStorage.getItem('access_token');
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
     // Load initial data if provided (for editing)
     useEffect(() => {
@@ -57,7 +58,7 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const programResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/prodi/study-programs/`, {
+                const programResponse = await fetch(baseUrl + `/api/prodi/study-programs/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -66,7 +67,7 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
                 const programData = await programResponse.json();
                 setStudyProgramList(programData);
 
-                const lecturerResponse = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/dosen/`, {
+                const lecturerResponse = await fetch(baseUrl + `/api/auth/dosen/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -218,10 +219,10 @@ function ClassModal({ isOpen, onClose, onSave, initialData }) {
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" onClick={onClose}>
-                            Cancel
+                            Batal
                         </button>
                         <button type="button" className="btn btn-primary" onClick={handleSave}>
-                            Save
+                            Simpan
                         </button>
                     </div>
                 </div>

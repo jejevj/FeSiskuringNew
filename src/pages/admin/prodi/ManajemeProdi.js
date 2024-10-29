@@ -18,13 +18,12 @@ function ManajemenProdiDetail() {
     const [perPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "name", direction: "ascending" });
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
-
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     // Fetch data from the API
     const fetchProdis = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/api/prodi/study-programs/`, {
+            const response = await fetch(`${apiUrl}/api/prodi/study-programs/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,7 +54,7 @@ function ManajemenProdiDetail() {
     const handleSaveProdi = async (prodiData) => {
         try {
             const method = editProdi ? 'PUT' : 'POST';
-            const url = editProdi ? `${baseUrl}/api/prodi/study-programs/${editProdi.id}/` : `${baseUrl}/api/prodi/study-programs/`;
+            const url = editProdi ? `${apiUrl}/api/prodi/study-programs/${editProdi.id}/` : `${apiUrl}/api/prodi/study-programs/`;
 
             const payload = {
                 ...prodiData,
@@ -102,7 +101,7 @@ function ManajemenProdiDetail() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${baseUrl}/api/prodi/study-programs/${id}/`, {
+                const response = await fetch(`${apiUrl}/api/prodi/study-programs/${id}/`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

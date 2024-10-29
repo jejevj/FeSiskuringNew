@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import Swal from "sweetalert2";
 import useTokenValidation from "../../../hook/TokenValidation";
 import EnrollmentModal from "../../../components/modals/kelas/EnrollmentModal";
@@ -7,8 +7,8 @@ import TopicModal from "../../../components/modals/kelas/TopikModal";
 
 function KelasDosenDetail() {
     useTokenValidation();
-
     const { id_kelas } = useParams();
+    const navigate = useNavigate(); // Initialize navigate
     const token = localStorage.getItem("access_token");
     const [classDetail, setClassDetail] = useState(null);
     const [topics, setTopics] = useState([]);
@@ -16,8 +16,9 @@ function KelasDosenDetail() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
 
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
+    const baseUrl = `${process.env.REACT_APP_API_BASE_URL}`;
 
+    // Fetch class details based on id_kelas
     const fetchClassDetail = async () => {
         try {
             const response = await fetch(`${baseUrl}/api/class/classes/${id_kelas}/`, {
@@ -35,6 +36,7 @@ function KelasDosenDetail() {
         }
     };
 
+    // Fetch topics related to the class
     const fetchTopics = async () => {
         try {
             const response = await fetch(`${baseUrl}/api/topic/topics/`, {
@@ -56,8 +58,27 @@ function KelasDosenDetail() {
         fetchTopics();
     }, [id_kelas]);
 
-    const handleTopicAdded = (newTopic) => {
-        setTopics([...topics, newTopic]);
+    // After a topic is added, create a discussion
+    const handleTopicAdded = async (newTopic) => {
+        setTopics((prevTopics) => [...prevTopics, newTopic]);
+
+        try {
+            await fetch(`${baseUrl}/api/discuss/discussions/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    topic: newTopic.topic_id,
+                    title: `Discussion on ${newTopic.topic_name}`,
+                }),
+            });
+            Swal.fire("Success", "Discussion created for the new topic!", "success");
+        } catch (error) {
+            console.error("Error creating discussion:", error);
+            Swal.fire("Error", "Failed to create discussion for the topic.", "error");
+        }
     };
 
     const handleDeleteTopic = async (topicId) => {
@@ -93,6 +114,10 @@ function KelasDosenDetail() {
         }
     };
 
+    const handleGoToDiscussion = (topicId) => {
+        navigate(`/discuss/${topicId}`); // Navigate to discussion page with the topic ID
+    };
+
     if (loading) {
         return <p>Loading class details...</p>;
     }
@@ -110,6 +135,7 @@ function KelasDosenDetail() {
                 <h2 className="section-title">{classDetail.class_name_long}</h2>
 
                 <div className="row">
+                    {/* Cards for different actions */}
                     <div className="col-lg-4 col-md-6 col-sm-6 col-12">
                         <div className="card card-statistic-1">
                             <div className="card-icon bg-primary">
@@ -117,7 +143,7 @@ function KelasDosenDetail() {
                             </div>
                             <div className="card-wrap">
                                 <div className="card-header">
-                                    <h4>Total Topics</h4>
+                                    <h4>Total Topik</h4>
                                 </div>
                                 <div className="card-body">
                                     <button onClick={() => setIsTopicModalOpen(true)} className="btn btn-icon icon-left btn-primary">
@@ -207,9 +233,15 @@ function KelasDosenDetail() {
                                         )}
                                         <button
                                             onClick={() => handleDeleteTopic(topic.topic_id)}
-                                            className="btn btn-danger mt-2"
+                                            className="btn btn-danger mt-2 mx-2"
                                         >
                                             Delete Topic
+                                        </button>
+                                        <button
+                                            onClick={() => handleGoToDiscussion(topic.topic_id)}
+                                            className="btn btn-secondary mt-2"
+                                        >
+                                            Discussion
                                         </button>
                                     </div>
                                 </div>

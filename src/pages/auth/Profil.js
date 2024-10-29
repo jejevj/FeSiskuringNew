@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 
 function ProfilPage() {
     const navigate = useNavigate();
+
+
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const location = useLocation();
     const userProfile = JSON.parse(localStorage.getItem('userProfile'));
     const role = userProfile ? userProfile.role : null;
@@ -42,7 +45,7 @@ function ProfilPage() {
         }
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/update-password/`, {
+            const response = await fetch(apiUrl + `/api/auth/update-password/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -125,7 +128,7 @@ function ProfilPage() {
             formData.append("profile_picture", file);
 
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/update-profile-picture/`, {
+                const response = await fetch(apiUrl + `/api/auth/update-profile-picture/`, {
                     method: "POST",
                     headers: {
                         // Add Authorization header if needed

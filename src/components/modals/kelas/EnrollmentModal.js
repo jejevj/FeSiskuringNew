@@ -11,7 +11,8 @@ function EnrollmentModal({ isOpen, onClose, token }) {
     const [newEnrollment, setNewEnrollment] = useState(null);
     const [mahasiswaOptions, setMahasiswaOptions] = useState([]); // List of available students for enrollment
 
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
 
     // Fetch enrollments for the class
     const fetchEnrollments = async () => {

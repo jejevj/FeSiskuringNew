@@ -20,9 +20,11 @@ import ManajemenAkunDetail from './pages/admin/account/ManajemenAkunDetail';
 import ManajemenKelas from './pages/admin/class/ManajemenKelas';
 import ListKelasDosen from './pages/dosen/kelas/ListKelas';
 import KelasDosenDetail from './pages/dosen/kelas/KelasDosenDetail';
+import DesktopOnlyWarning from './pages/DesktopOnlyWarning';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('access_token'));
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
@@ -49,7 +51,7 @@ function App() {
     if (result.isConfirmed) {
       if (refreshToken) {
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/auth/logout/', {
+          const response = await fetch(baseUrl + 'api/auth/logout/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -82,6 +84,7 @@ function App() {
   return (
     <BrowserRouter>
       <div id="app">
+        <DesktopOnlyWarning />
         <Routes>
           <Route path="/" element={
             <ProtectedRoute>

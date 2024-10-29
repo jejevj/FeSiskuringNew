@@ -16,13 +16,14 @@ function ManajemenFakultas() {
     const [perPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "name", direction: "ascending" });
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
 
+
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     // Fetch data from the API
     const fetchFaculties = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/api/faculty/faculties/`, {
+            const response = await fetch(apiUrl + `/api/faculty/faculties/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ function ManajemenFakultas() {
     const handleSaveFaculty = async (facultyData) => {
         try {
             const method = editFaculty ? 'PUT' : 'POST';
-            const url = editFaculty ? `${baseUrl}/api/faculty/faculties/${editFaculty.id}/` : `${baseUrl}/api/faculty/faculties/`;
+            const url = editFaculty ? `${apiUrl}/api/faculty/faculties/${editFaculty.id}/` : `${apiUrl}/api/faculty/faculties/`;
 
             const response = await fetch(url, {
                 method: method,
@@ -94,7 +95,7 @@ function ManajemenFakultas() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${baseUrl}/api/faculty/faculties/${id}/`, {
+                const response = await fetch(`${apiUrl}/api/faculty/faculties/${id}/`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

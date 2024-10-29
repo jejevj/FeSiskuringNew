@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import SweetAlert from '../components/alerts/swal';
 
 function LoginPage({ onLogin }) {
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ function LoginPage({ onLogin }) {
 
         try {
             // First API call to log in
-            const response = await fetch('http://127.0.0.1:8000/api/auth/login/', {
+            const response = await fetch(apiUrl + '/api/auth/login/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -35,7 +36,7 @@ function LoginPage({ onLogin }) {
             const data = await response.json();
 
             // Fetch user profile using the received access token
-            const profileResponse = await fetch('http://127.0.0.1:8000/api/auth/profile/', {
+            const profileResponse = await fetch(apiUrl + '/api/auth/profile/', {
                 headers: {
                     Authorization: `Bearer ${data.access}`,
                 },

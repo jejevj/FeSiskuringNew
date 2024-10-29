@@ -17,6 +17,8 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
     });
     const [facultyList, setFacultyList] = useState([]);
     const token = localStorage.getItem('access_token');
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
 
     // Load initial data if provided (for editing)
     useEffect(() => {
@@ -45,7 +47,7 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
     useEffect(() => {
         const fetchFaculty = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/faculty/faculties/`, {
+                const response = await fetch(baseUrl + `/api/faculty/faculties/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`

@@ -29,12 +29,13 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
     }, [initialData]);
 
     const token = localStorage.getItem('access_token');
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
     // Fetch dosen data
     useEffect(() => {
         const fetchDosen = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/auth/dosen/`, {
+                const response = await fetch(baseUrl + `/api/auth/dosen/`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

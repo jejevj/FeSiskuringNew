@@ -11,13 +11,13 @@ function ManajemenProdi() {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate(); // Initialize useNavigate
 
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
 
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     // Fetch data from the API
     const fetchFaculties = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/api/faculty/faculties/`, {
+            const response = await fetch(`${apiUrl}/api/faculty/faculties/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

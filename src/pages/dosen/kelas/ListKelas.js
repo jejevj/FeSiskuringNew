@@ -9,12 +9,12 @@ function ListKelasDosen() {
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
 
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     // Fetch classes and filter based on user ID
     const fetchClasses = async () => {
         try {
-            const response = await fetch(`${baseUrl}/api/class/classes/`, {
+            const response = await fetch(`${apiUrl}/api/class/classes/`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,

@@ -8,6 +8,8 @@ function TopicModal({ isOpen, onClose, onSave, token, classModel }) {
     const [order, setOrder] = useState(1);
     const [description, setDescription] = useState("");
     const [moduleFile, setModuleFile] = useState(null);
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
 
     const handleSave = async () => {
         const formData = new FormData();
@@ -19,7 +21,7 @@ function TopicModal({ isOpen, onClose, onSave, token, classModel }) {
         if (moduleFile) formData.append("module_file", moduleFile);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}/api/topic/topics/`, {
+            const response = await fetch(baseUrl + `/api/topic/topics/`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -56,7 +58,7 @@ function TopicModal({ isOpen, onClose, onSave, token, classModel }) {
     if (!isOpen) return null;
 
     return (
-        <div className="modal show fade d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog">
+        <div className="modal modal-lg show fade d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog">
             <div className="modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     <div className="modal-header">

@@ -16,14 +16,15 @@ function ManajemenKelas() {
     const [sortConfig, setSortConfig] = useState({ key: "class_name_long", direction: "ascending" });
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
-    const baseUrl = `${process.env.REACT_APP_API_BASE}:${process.env.REACT_APP_API_PORT}`;
+
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
 
     // Fetch class data
     const fetchClasses = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/api/class/classes/`, {
+            const response = await fetch(`${apiUrl}/api/class/classes/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ function ManajemenKelas() {
     const handleSaveClass = async (classData) => {
         try {
             const method = editClass ? 'PUT' : 'POST';
-            const url = editClass ? `${baseUrl}/api/class/classes/${editClass.class_id}/` : `${baseUrl}/api/class/classes/`;
+            const url = editClass ? `${apiUrl}/api/class/classes/${editClass.class_id}/` : `${apiUrl}/api/class/classes/`;
 
             const response = await fetch(url, {
                 method: method,
@@ -92,7 +93,7 @@ function ManajemenKelas() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${baseUrl}/api/class/classes/${classId}/`, {
+                const response = await fetch(`${apiUrl}/api/class/classes/${classId}/`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
