@@ -1,14 +1,22 @@
+// src/components/ManajemenAkunDetail.js
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useTokenValidation from "../../../hook/TokenValidation";
 import SweetAlert from "../../../components/alerts/swal";
 import AccountModal from "../../../components/modals/AccountModal";
+import {
+    fetchUsers,
+    saveUser,
+    sendEmail,
+    uploadFile,
+    deleteUser,
+} from "../../../api/manajemen_akun";
 
 function ManajemenAkunDetail() {
     useTokenValidation();
 
     const { role } = useParams();
-    const token = localStorage.getItem("access_token");
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -19,25 +27,14 @@ function ManajemenAkunDetail() {
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
 
-    const apiUrl = process.env.REACT_APP_API_BASE_URL;
+    useEffect(() => {
+        loadUsers();
+    }, [role]);
 
-    // Fetch users based on role
-    const fetchUsers = async () => {
+    const loadUsers = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/api/auth/users/?role=${role}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await fetchUsers(role);
             setUsers(data);
             setFilteredUsers(data);
         } catch (error) {
@@ -47,11 +44,6 @@ function ManajemenAkunDetail() {
         }
     };
 
-    useEffect(() => {
-        fetchUsers();
-    }, [role]);
-
-    // Generate a random password
     const generateRandomPassword = () => {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         let password = "";
@@ -61,29 +53,15 @@ function ManajemenAkunDetail() {
         return password;
     };
 
-    // Handle saving a user
     const handleSaveUser = async (userData) => {
         try {
-            const method = editUser ? 'PUT' : 'POST';
-            const url = editUser ? `${apiUrl}/api/auth/users/${editUser.id}/` : `${apiUrl}/api/auth/register/`;
-
-            // Set a generated password for new users
             if (!editUser) {
                 userData.password = generateRandomPassword();
             }
 
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(userData)
-            });
+            const savedUser = await saveUser(userData, editUser);
 
-            const savedUser = await response.json();
-
-            if (method === 'POST') {
+            if (!editUser) {
                 setUsers((prev) => [...prev, savedUser]);
                 await sendEmail(savedUser.email, savedUser.username, userData.password);
             } else {
@@ -97,65 +75,20 @@ function ManajemenAkunDetail() {
         }
     };
 
-    // Function to send email with credentials
-    const sendEmail = async (email, username, password) => {
-        try {
-            const emailData = {
-                email: email,
-                username: username,
-                password: password,
-            };
-
-            await fetch(`${apiUrl}/api/email/send-email/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(emailData),
-            });
-            console.log("Email sent successfully");
-        } catch (error) {
-            console.error("Error sending email:", error.message || error);
-        }
-    };
-
-    // Handle file upload for bulk user upload
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("access", token);
-
         try {
-            const response = await fetch(`${apiUrl}/api/auth/upload-excel/`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                SweetAlert.showAlert("Gagal", "Gagal mengunggah file. Silakan coba lagi.", "error", "Tutup");
-                throw new Error(`Failed to upload file: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            console.log("File uploaded successfully:", result);
+            await uploadFile(file);
             SweetAlert.showAlert("Berhasil", "File berhasil diunggah dan pengguna ditambahkan!", "success", "Tutup");
-
-            // Refresh the user list after upload
-            fetchUsers();
+            loadUsers();
         } catch (error) {
             console.error("Error uploading file:", error.message || error);
             SweetAlert.showAlert("Gagal", "Gagal mengunggah file. Silakan coba lagi.", "error", "Tutup");
         }
     };
 
-    // Additional functionalities: search, filter, sort, delete
     const handleDeleteUser = async (userId) => {
         const result = await SweetAlert.showConfirmation(
             "PERINGATAN!",
@@ -165,28 +98,16 @@ function ManajemenAkunDetail() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/auth/users/${userId}/`, {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to delete user with id ${userId}`);
-                }
-
+                await deleteUser(userId);
                 setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 setFilteredUsers((prevFiltered) => prevFiltered.filter((user) => user.id !== userId));
-
                 SweetAlert.showAlert("Berhasil", "Pengguna berhasil dihapus!", "success", "Tutup");
             } catch (error) {
-
                 console.error("Error deleting user:", error.message || error);
             }
         }
     };
-    // Sorting function
+
     const sortTable = (key) => {
         let direction = "ascending";
         if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -202,8 +123,6 @@ function ManajemenAkunDetail() {
         setFilteredUsers(sortedData);
     };
 
-
-    // Filtering and pagination
     const startIndex = (page - 1) * perPage;
     const paginatedData = filteredUsers.slice(startIndex, startIndex + perPage);
     const totalPages = Math.ceil(filteredUsers.length / perPage);
@@ -217,10 +136,7 @@ function ManajemenAkunDetail() {
                 <div className="d-flex mb-3">
                     <button
                         className="btn btn-primary mr-2"
-                        onClick={() => {
-                            setIsModalOpen(true);
-                            setEditUser(null);
-                        }}
+                        onClick={() => setIsModalOpen(true)}
                     >
                         Tambah Akun
                     </button>
@@ -244,15 +160,9 @@ function ManajemenAkunDetail() {
                         <thead>
                             <tr>
                                 <th className="text-center">#</th>
-                                <th onClick={() => sortTable("username")}>
-                                    NIM {sortConfig.key === "username" ? (sortConfig.direction === "ascending" ? "▲" : "▼") : ""}
-                                </th>
-                                <th onClick={() => sortTable("email")}>
-                                    Email {sortConfig.key === "email" ? (sortConfig.direction === "ascending" ? "▲" : "▼") : ""}
-                                </th>
-                                <th onClick={() => sortTable("role")}>
-                                    Role {sortConfig.key === "role" ? (sortConfig.direction === "ascending" ? "▲" : "▼") : ""}
-                                </th>
+                                <th onClick={() => sortTable("username")}>NIM</th>
+                                <th onClick={() => sortTable("email")}>Email</th>
+                                <th onClick={() => sortTable("role")}>Role</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>

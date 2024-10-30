@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useParams } from 'react-router-dom';
+import { fetchFaculties } from '../../api/faculty';
+import { fetchProdisByFaculty } from '../../api/prodi';
 
 function AccountModal({ isOpen, onClose, onSave, initialData }) {
     const { role } = useParams(); // Get role from URL
@@ -14,26 +16,22 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
         email: "",
         phone_number: "",
         faculty: null,
+        prodi: null,
     });
-    const [facultyList, setFacultyList] = useState([]);
-    const token = localStorage.getItem('access_token');
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
+    const [facultyList, setFacultyList] = useState([]);
+    const [prodiList, setProdiList] = useState([]);
+    const token = localStorage.getItem('access_token');
 
     // Load initial data if provided (for editing)
     useEffect(() => {
         if (initialData) {
-            setFormData({
-                username: initialData.username || "",
-                password: formData.password, // Keep the generated password as is
+            setFormData((prevData) => ({
+                ...prevData,
+                ...initialData, // Spread initial data into formData
+                password: prevData.password || "", // Retain existing password
                 role: role, // Ensure role from URL
-                birthdate: initialData.birthdate || "",
-                first_name: initialData.first_name || "",
-                last_name: initialData.last_name || "",
-                email: initialData.email || "",
-                phone_number: initialData.phone_number || "",
-                faculty: initialData.faculty || null,
-            });
+            }));
         } else {
             setFormData((prevData) => ({
                 ...prevData,
@@ -45,25 +43,31 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
 
     // Fetch faculty list when the modal is open
     useEffect(() => {
-        const fetchFaculty = async () => {
+        const loadFaculties = async () => {
             try {
-                const response = await fetch(baseUrl + `/api/faculty/faculties/`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const facultyData = await response.json();
-                setFacultyList(facultyData);
+                const faculties = await fetchFaculties(token);
+                setFacultyList(faculties);
             } catch (error) {
                 console.error("Error fetching faculties:", error);
             }
         };
 
-        if (isOpen) {
-            fetchFaculty();
-        }
-    }, [isOpen]);
+        if (isOpen) loadFaculties();
+    }, [isOpen, token]);
+
+    // Fetch study programs (prodi) when a faculty is selected
+    useEffect(() => {
+        const loadProdis = async (facultyId) => {
+            try {
+                const prodis = await fetchProdisByFaculty(facultyId, token);
+                setProdiList(prodis);
+            } catch (error) {
+                console.error("Error fetching study programs:", error);
+            }
+        };
+
+        if (formData.faculty) loadProdis(formData.faculty);
+    }, [formData.faculty, token]);
 
     // Generate a random password
     const generateRandomPassword = () => {
@@ -97,7 +101,13 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
     // Options for faculty selection
     const facultyOptions = facultyList.map((faculty) => ({
         value: faculty.id,
-        label: faculty.name
+        label: faculty.name,
+    }));
+
+    // Options for prodi selection
+    const prodiOptions = prodiList.map((prodi) => ({
+        value: prodi.id,
+        label: prodi.name,
     }));
 
     return (
@@ -116,7 +126,7 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
                                 background: "transparent",
                                 fontSize: "1.5rem",
                                 lineHeight: "1",
-                                margin: "0"
+                                margin: "0",
                             }}
                         >
                             <span aria-hidden="true">&times;</span>
@@ -185,7 +195,14 @@ function AccountModal({ isOpen, onClose, onSave, initialData }) {
                             onChange={(option) => handleSelectChange("faculty", option)}
                             placeholder="Select Faculty"
                             className="mb-2"
-                            value={facultyOptions.find(option => option.value === formData.faculty)}
+                            value={facultyOptions.find((option) => option.value === formData.faculty)}
+                        />
+                        <Select
+                            options={prodiOptions}
+                            onChange={(option) => handleSelectChange("prodi", option)}
+                            placeholder="Select Study Program"
+                            className="mb-2"
+                            value={prodiOptions.find((option) => option.value === formData.prodi)}
                         />
                     </div>
                     <div className="modal-footer">
