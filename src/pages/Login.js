@@ -1,10 +1,9 @@
 // pages/Login.js
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import SweetAlert from '../components/alerts/swal';
+import { login } from '../api/auth';
 
 function LoginPage({ onLogin }) {
-    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -13,53 +12,14 @@ function LoginPage({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        try {
-            // First API call to log in
-            const response = await fetch(apiUrl + '/api/auth/login/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
+        const result = await login(username, password);
+        if (result.success) {
+            // Call onLogin with tokens to update the state in App
+            onLogin(result.data.access, result.data.refresh);
 
-            // Check if the response is ok
-            if (!response.ok) {
-                await SweetAlert.showAlert(
-                    'Login Gagal',
-                    'Silahkan Periksa Kembali Data Yang Anda Masukkan',
-                    'error',
-                    'Tutup'
-                );
-                throw new Error('Login failed'); // Throw error to skip to catch block
-            }
-
-            // If login is successful, get the data
-            const data = await response.json();
-
-            // Fetch user profile using the received access token
-            const profileResponse = await fetch(apiUrl + '/api/auth/profile/', {
-                headers: {
-                    Authorization: `Bearer ${data.access}`,
-                },
-            });
-
-            // Check if profile fetch is successful
-            if (profileResponse.ok) {
-                const profileData = await profileResponse.json();
-                localStorage.setItem('userProfile', JSON.stringify(profileData)); // Store user profile
-
-                // Call the onLogin function to update the token state
-                onLogin(data.access, data.refresh);
-
-                // Redirect to the original requested page or default to '/'
-                const redirectTo = new URLSearchParams(location.search).get('redirectTo') || '/';
-                navigate(redirectTo, { replace: true });
-            } else {
-                throw new Error('Failed to fetch profile data');
-            }
-
-        } catch (error) {
-            console.error('Error during login:', error);
-
+            // Redirect to the requested page or to '/'
+            const redirectTo = new URLSearchParams(location.search).get('redirectTo') || '/';
+            navigate(redirectTo, { replace: true });
         }
     };
 

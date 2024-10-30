@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import useTokenValidation from "../../../hook/TokenValidation";
 import EnrollmentModal from "../../../components/modals/kelas/EnrollmentModal";
 import TopicModal from "../../../components/modals/kelas/TopikModal";
+import QuizModal from "../../../components/modals/kelas/QuizModal";
 
 function KelasDosenDetail() {
     useTokenValidation();
@@ -15,6 +16,8 @@ function KelasDosenDetail() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+    const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+    const [quizzes, setQuizzes] = useState([]);
 
     const baseUrl = `${process.env.REACT_APP_API_BASE_URL}`;
 
@@ -125,6 +128,11 @@ function KelasDosenDetail() {
     if (!classDetail) {
         return <p>Class not found.</p>;
     }
+    // Fetch quizzes if needed
+    const handleQuizCreated = (newQuiz) => {
+        setQuizzes([...quizzes, newQuiz]);
+    };
+
 
     return (
         <>
@@ -163,9 +171,10 @@ function KelasDosenDetail() {
                                     <h4>Kuis</h4>
                                 </div>
                                 <div className="card-body">
-                                    <a href="#" className="btn btn-icon icon-left btn-primary">
+                                    <button onClick={() => setIsQuizModalOpen(true)} className="btn btn-icon icon-left btn-primary">
+
                                         <i className="far fa-edit" /> Tambah Kuis
-                                    </a>
+                                        Tambah Kuis</button>
                                 </div>
                             </div>
                         </div>
@@ -262,6 +271,13 @@ function KelasDosenDetail() {
                     onSave={handleTopicAdded}
                     token={token}
                     classModel={id_kelas}
+                />
+                <QuizModal
+                    isOpen={isQuizModalOpen}
+                    onClose={() => setIsQuizModalOpen(false)}
+                    token={token}
+                    topics={topics}
+                    onQuizCreated={handleQuizCreated}
                 />
             </section>
         </>

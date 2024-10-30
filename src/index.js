@@ -12,6 +12,7 @@ import "bootstrap/modules/owlcarousel2/dist/assets/owl.carousel.min.css";
 import "bootstrap/modules/owlcarousel2/dist/assets/owl.theme.default.min.css";
 import "bootstrap/css/style.css";
 import "bootstrap/css/components.css";
+import { BrowserRouter } from 'react-router-dom';
 // import "bootstrap/modules/jquery.min.js"
 // import "bootstrap/modules/popper.js"
 // import "bootstrap/modules/tooltip.js"
@@ -34,9 +35,12 @@ import "bootstrap/css/components.css";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+
+  <BrowserRouter>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function

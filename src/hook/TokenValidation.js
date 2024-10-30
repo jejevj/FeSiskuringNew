@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SweetAlert from '../components/alerts/swal';
 
 const useTokenValidation = (
 
@@ -10,8 +11,10 @@ const useTokenValidation = (
         const checkToken = async () => {
             const token = localStorage.getItem('access_token');
             const refresh = localStorage.getItem('refresh_token');
-
-            if (token) {
+            if (!refresh) {
+                SweetAlert.showAlert("Belum Login", "Silahkan Login Terlebih Dahulu", "error", "Tutup");
+                navigate(loginPath, { replace: true });
+            } else {
                 try {
                     const response = await fetch(`${apiBaseUrl}/api/auth/profile/`, {
                         headers: {
@@ -21,7 +24,7 @@ const useTokenValidation = (
 
                     if (response.ok) {
                         const profileData = await response.json();
-                        localStorage.setItem('msg', "101"); //Profil Di Load
+                        // localStorage.setItem('msg', "101"); //Profil Di Load
                         localStorage.setItem('userProfile', JSON.stringify(profileData));
                     } else if (response.status === 401) {
 
@@ -49,7 +52,6 @@ const useTokenValidation = (
                                     // If refreshing fails, remove tokens and navigate to login
                                     localStorage.removeItem('access_token');
                                     localStorage.removeItem('refresh_token');
-                                    localStorage.setItem('msg', '2'); //Sesi Berakhir
                                     navigate(loginPath, { replace: true });
                                 }
                             } catch (error) {
@@ -57,24 +59,22 @@ const useTokenValidation = (
                                 localStorage.removeItem('access_token');
                                 localStorage.removeItem('refresh_token');
                                 navigate(loginPath, { replace: true });
-                                localStorage.setItem('msg', '2');//Sess Habis
                             }
                         } else {
                             // If there's no refresh token, navigate to login
                             localStorage.removeItem('access_token');
                             localStorage.removeItem('refresh_token');
-                            localStorage.setItem('msg', '3'); //Belum Login
                             navigate(loginPath, { replace: true });
                         }
                     }
                 } catch (error) {
                     console.error('Error checking token:', error);
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    localStorage.setItem('msg', '3'); //Belum Login
-                    navigate(loginPath, { replace: true });
+                    SweetAlert.showAlert("Belum Login", "Silahkan Login Terlebih Dahulu", "errorr", "Tutup")
                 }
             }
+            // if (token) {
+
+            // }
         };
 
         checkToken();

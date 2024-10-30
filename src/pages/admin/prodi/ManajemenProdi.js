@@ -2,43 +2,62 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useTokenValidation from "../../../hook/TokenValidation";
 import SweetAlert from "../../../components/alerts/swal";
-import ProdiModal from "../../../components/modals/ProdiModal"; // Import modal for adding/editing Prodi
+import ProdiModal from "../../../components/modals/ProdiModal";
+import { fetchProdisByFaculty, saveProdi, deleteProdi, fetchUsers } from "../../../api/prodi";
 
 function ManajemenProdiDetail() {
     useTokenValidation();
 
-    const { facultyId } = useParams(); // Get faculty ID from the URL
-    const token = localStorage.getItem('access_token');
+    const { facultyId } = useParams();
+    const token = localStorage.getItem("access_token");
     const [prodis, setProdis] = useState([]);
     const [filteredProdis, setFilteredProdis] = useState([]);
+    const [users, setUsers] = useState([]); // Ensure users is initialized as an array
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editProdi, setEditProdi] = useState(null); // New state for editing
+    const [editProdi, setEditProdi] = useState(null);
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "name", direction: "ascending" });
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
-    // Fetch data from the API
-    const fetchProdis = async () => {
+
+    // Fetch users for head of program names
+    // const fetchUsers = async () => {
+    //     try {
+    //         const response = await fetch(`${apiUrl}/api/auth/users/`, {
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         });
+    //         const data = await response.json();
+    //         setUsers(Array.isArray(data) ? data : []); // Ensure data is an array
+    //     } catch (error) {
+    //         console.error("Error fetching users:", error.message || error);
+    //         setUsers([]); // Fallback to empty array if fetch fails
+    //     }
+    // };
+
+
+    // Fetch prodis based on faculty ID
+    const loadUsers = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/api/prodi/study-programs/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const facultyFilteredData = data.filter((prodi) => prodi.faculty === parseInt(facultyId)); // Filter by facultyId
-            setProdis(facultyFilteredData);
-            setFilteredProdis(facultyFilteredData);
+            const data = await fetchUsers(token);
+            setUsers(data);
+        } catch (error) {
+            console.error("Error fetching Users:", error.message || error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    const loadProdis = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchProdisByFaculty(facultyId, token);
+            setProdis(data);
+            setFilteredProdis(data);
         } catch (error) {
             console.error("Error fetching study programs:", error.message || error);
         } finally {
@@ -46,38 +65,23 @@ function ManajemenProdiDetail() {
         }
     };
 
-    // Load data on component mount
     useEffect(() => {
-        fetchProdis();
-    }, [facultyId]); // Refetch if facultyId changes
+        loadUsers();
+        loadProdis();
+    }, [facultyId]);
 
     const handleSaveProdi = async (prodiData) => {
         try {
-            const method = editProdi ? 'PUT' : 'POST';
-            const url = editProdi ? `${apiUrl}/api/prodi/study-programs/${editProdi.id}/` : `${apiUrl}/api/prodi/study-programs/`;
+            const savedProdi = await saveProdi(
+                { ...prodiData, faculty: parseInt(facultyId, 10) },
+                token,
+                editProdi ? editProdi.id : null
+            );
 
-            const payload = {
-                ...prodiData,
-                faculty: parseInt(facultyId, 10), // Set faculty to the URL's facultyId
-            };
-
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const updatedProdi = await response.json();
-
-            if (method === 'POST') {
-                setProdis((prev) => [...prev, updatedProdi]);
+            if (editProdi) {
+                setProdis((prev) => prev.map((prodi) => (prodi.id === savedProdi.id ? savedProdi : prodi)));
             } else {
-                setProdis((prev) =>
-                    prev.map((prodi) => (prodi.id === updatedProdi.id ? updatedProdi : prodi))
-                );
+                setProdis((prev) => [...prev, savedProdi]);
             }
 
             setIsModalOpen(false);
@@ -101,26 +105,12 @@ function ManajemenProdiDetail() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/prodi/study-programs/${id}/`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to delete study program with id ${id}`);
-                }
+                await deleteProdi(id, token);
 
                 setProdis((prevProdis) => prevProdis.filter((prodi) => prodi.id !== id));
                 setFilteredProdis((prevFiltered) => prevFiltered.filter((prodi) => prodi.id !== id));
 
-                SweetAlert.showAlert(
-                    "Berhasil",
-                    "Program Studi Berhasil Dihapus!",
-                    "success",
-                    "Tutup"
-                );
+                SweetAlert.showAlert("Berhasil", "Program Studi Berhasil Dihapus!", "success", "Tutup");
             } catch (error) {
                 console.error("Error deleting study program:", error.message || error);
             }
@@ -129,13 +119,18 @@ function ManajemenProdiDetail() {
 
     // Filter by search term
     useEffect(() => {
-        const filtered = prodis.filter((prodi) =>
-            (prodi.name?.toLowerCase().includes(searchTerm.toLowerCase()) || "") ||
-            (prodi.code?.toLowerCase().includes(searchTerm.toLowerCase()) || "") ||
-            (prodi.head_of_program?.toLowerCase().includes(searchTerm.toLowerCase()) || "")
-        );
+        const filtered = prodis.filter((prodi) => {
+            const headOfProgram = Array.isArray(users)
+                ? users.find((user) => user.id === prodi.head_of_program)
+                : null;
+            return (
+                (prodi.name?.toLowerCase().includes(searchTerm.toLowerCase()) || "") ||
+                (prodi.code?.toLowerCase().includes(searchTerm.toLowerCase()) || "") ||
+                (headOfProgram?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) || "")
+            );
+        });
         setFilteredProdis(filtered);
-    }, [searchTerm, prodis]);
+    }, [searchTerm, prodis, users]);
 
     // Sorting function
     const sortTable = (key) => {
@@ -220,7 +215,11 @@ function ManajemenProdiDetail() {
                                                         <td className="text-center">{startIndex + index + 1}</td>
                                                         <td>{prodi.code}</td>
                                                         <td>{prodi.name}</td>
-                                                        <td>{prodi.head_of_program}</td>
+                                                        <td>
+                                                            {prodi.head_of_program
+                                                                ? (users.find(user => user.id == prodi.head_of_program)?.first_name + " " + users.find(user => user.id == prodi.head_of_program)?.last_name || "No Head")
+                                                                : "No Head"}
+                                                        </td>
                                                         <td>
                                                             <button
                                                                 className="btn btn-secondary btn-sm"
@@ -245,7 +244,6 @@ function ManajemenProdiDetail() {
                                         </tbody>
                                     </table>
                                 </div>
-                                {/* Pagination Controls */}
                                 <div className="pagination-controls mt-3">
                                     <button
                                         className="btn btn-secondary"
@@ -268,7 +266,15 @@ function ManajemenProdiDetail() {
                     </div>
                 </div>
             </div>
-            {/* Prodi Modal */}
+            <ProdiModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditProdi(null);
+                }}
+                onSave={handleSaveProdi}
+                initialData={editProdi}
+            />
             <ProdiModal
                 isOpen={isModalOpen}
                 onClose={() => {

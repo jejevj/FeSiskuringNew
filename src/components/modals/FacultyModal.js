@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
+import { fetchDosen } from '../../api/dosen'; // Import the new API function
 
 function FacultyModal({ isOpen, onClose, onSave, initialData }) {
     const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
         contact_phone: ""
     });
     const [dosenList, setDosenList] = useState([]); // State to store dosen list
+    const token = localStorage.getItem('access_token');
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
     // Load initial data when provided
     useEffect(() => {
@@ -28,21 +31,11 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
         }
     }, [initialData]);
 
-    const token = localStorage.getItem('access_token');
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
-
-    // Fetch dosen data
+    // Fetch dosen data when the modal is open
     useEffect(() => {
-        const fetchDosen = async () => {
+        const loadDosenData = async () => {
             try {
-                const response = await fetch(baseUrl + `/api/auth/dosen/`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
+                const data = await fetchDosen(token); // Use the new API function
                 setDosenList(data);
             } catch (error) {
                 console.error("Error fetching dosen data:", error);
@@ -50,9 +43,9 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
         };
 
         if (isOpen) {
-            fetchDosen(); // Only fetch dosen data when the modal is open
+            loadDosenData(); // Only fetch dosen data when the modal is open
         }
-    }, [isOpen]);
+    }, [isOpen, token]);
 
     const handleDeanChange = (selectedOption) => {
         setFormData((prevData) => ({
@@ -109,7 +102,6 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
                             onChange={handleChange}
                             className="form-control mb-2"
                         />
-
                         {/* Dropdown for Penanggung Jawab with react-select */}
                         <Select
                             options={dosenOptions}
@@ -118,7 +110,6 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
                             className="mb-2"
                             value={dosenOptions.find(option => option.label === formData.dean_name) || null}
                         />
-
                         <input
                             type="email"
                             name="contact_email"
@@ -137,7 +128,6 @@ function FacultyModal({ isOpen, onClose, onSave, initialData }) {
                             className="form-control mb-2"
                             readOnly
                         />
-
                         <input
                             type="text"
                             name="description"

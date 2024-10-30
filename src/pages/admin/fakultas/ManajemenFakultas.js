@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useTokenValidation from "../../../hook/TokenValidation";
 import FacultyModal from "../../../components/modals/FacultyModal";
 import SweetAlert from "../../../components/alerts/swal";
+import { fetchFaculties, saveFaculty, deleteFaculty } from '../../../api/faculty';
 
 function ManajemenFakultas() {
     useTokenValidation();
@@ -11,31 +12,16 @@ function ManajemenFakultas() {
     const [filteredFaculties, setFilteredFaculties] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editFaculty, setEditFaculty] = useState(null); // New state for editing
+    const [editFaculty, setEditFaculty] = useState(null);
     const [page, setPage] = useState(1);
     const [perPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "name", direction: "ascending" });
 
-
-    const apiUrl = process.env.REACT_APP_API_BASE_URL;
-    // Fetch data from the API
-    const fetchFaculties = async () => {
+    const fetchFacultiesData = async () => {
         setLoading(true);
         try {
-            const response = await fetch(apiUrl + `/api/faculty/faculties/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await fetchFaculties(token);
             setFaculties(data);
             setFilteredFaculties(data);
         } catch (error) {
@@ -45,33 +31,20 @@ function ManajemenFakultas() {
         }
     };
 
-    // Load data on component mount
     useEffect(() => {
-        fetchFaculties();
+        fetchFacultiesData();
     }, []);
 
     const handleSaveFaculty = async (facultyData) => {
         try {
-            const method = editFaculty ? 'PUT' : 'POST';
-            const url = editFaculty ? `${apiUrl}/api/faculty/faculties/${editFaculty.id}/` : `${apiUrl}/api/faculty/faculties/`;
+            const updatedFaculty = await saveFaculty(facultyData, token, editFaculty ? editFaculty.id : null);
 
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(facultyData)
-            });
-
-            const updatedFaculty = await response.json();
-
-            if (method === 'POST') {
-                setFaculties((prev) => [...prev, updatedFaculty]);
-            } else {
+            if (editFaculty) {
                 setFaculties((prev) =>
                     prev.map((faculty) => (faculty.id === updatedFaculty.id ? updatedFaculty : faculty))
                 );
+            } else {
+                setFaculties((prev) => [...prev, updatedFaculty]);
             }
 
             setIsModalOpen(false);
@@ -95,17 +68,7 @@ function ManajemenFakultas() {
         );
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/faculty/faculties/${id}/`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to delete faculty with id ${id}`);
-                }
-
+                await deleteFaculty(id, token);
                 setFaculties((prevFaculties) => prevFaculties.filter((faculty) => faculty.id !== id));
                 setFilteredFaculties((prevFiltered) => prevFiltered.filter((faculty) => faculty.id !== id));
 
@@ -121,7 +84,6 @@ function ManajemenFakultas() {
         }
     };
 
-    // Filter by search term
     useEffect(() => {
         const filtered = faculties.filter((faculty) =>
             faculty.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,7 +93,6 @@ function ManajemenFakultas() {
         setFilteredFaculties(filtered);
     }, [searchTerm, faculties]);
 
-    // Sorting function
     const sortTable = (key) => {
         let direction = "ascending";
         if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -147,7 +108,6 @@ function ManajemenFakultas() {
         setFilteredFaculties(sortedData);
     };
 
-    // Pagination
     const startIndex = (page - 1) * perPage;
     const paginatedData = filteredFaculties.slice(startIndex, startIndex + perPage);
     const totalPages = Math.ceil(filteredFaculties.length / perPage);

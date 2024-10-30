@@ -1,7 +1,6 @@
 import React from 'react';
 import moment from 'moment';
 import { useLocation, Link } from 'react-router-dom';
-import bcrypt from 'bcryptjs';
 const Header = ({ onLogout }) => {
     const location = useLocation();
     // Retrieve user profile from local storage
@@ -21,20 +20,12 @@ const Header = ({ onLogout }) => {
     const dateTimeAgo = moment(new Date(last_login)).fromNow();
 
 
-    const hashId = (password) => {
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(password, salt);
-        return hash;
-    };
-
-    const id_hashed = hashId(id_user);
-
     const sidebarItemsMhs = [
         { path: '/', label: 'Dashboard', icon: 'fas fa-home' },
         { path: '/kelas', label: 'Kelas', icon: 'fas fa-chalkboard-teacher' },
         { path: '/absensi', label: 'Absensi', icon: 'fas fa-calendar-check' },
         { path: '/pesan', label: 'Pesan', icon: 'fas fa-comment-dots' },
-        { path: '/forum-diskusi/' + id_hashed, label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
+        { path: '/forum-diskusi/', label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
     ];
 
 
@@ -43,7 +34,7 @@ const Header = ({ onLogout }) => {
         { path: '/dosen/kelas', label: 'Kelas', icon: 'fas fa-chalkboard-teacher' },
         { path: '/dosen/absensi', label: 'Absensi', icon: 'fas fa-calendar-check' },
         { path: '/dosen/pesan', label: 'Pesan', icon: 'fas fa-comment-dots' },
-        { path: '/forum-diskusi/' + id_hashed, label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
+        { path: '/forum-diskusi/', label: 'Forum Diskusi (Aktif)', icon: 'fas fa-comments' },
     ];
 
     const sidebarItemsAdmin = [
@@ -141,10 +132,10 @@ const Header = ({ onLogout }) => {
             <div className="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div className="sidebar-brand">
-                        <a href="index.html">SIKSURING</a>
+                        <a href="/">SISKURING</a>
                     </div>
                     <div className="sidebar-brand sidebar-brand-sm">
-                        <a href="index.html">SK</a>
+                        <a href="/">SK</a>
                     </div>
                     <ul className="sidebar-menu">
                         <li className="menu-header">Dashboard</li>
